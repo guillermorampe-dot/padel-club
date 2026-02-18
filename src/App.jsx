@@ -207,7 +207,7 @@ export default function App() {
   return (
     <div className="min-h-screen text-white" style={{ background: "linear-gradient(135deg, #0f172a 0%, #1a2744 40%, #0f2a1a 100%)" }}>
       <header className="sticky top-0 z-40 border-b border-white/10 backdrop-blur-md" style={{ background: "rgba(15,23,42,0.8)" }}>
-        <div className="w-full max-w-6xl mx-auto px-4 pt-4 pb-0 flex items-center justify-between">
+        <div className="w-full px-4 pt-4 pb-0 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xl">🎾</div>
             <div>
@@ -216,7 +216,7 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="w-full max-w-6xl mx-auto px-4 flex gap-1 mt-3 overflow-x-auto">
+        <div className="w-full px-4 flex gap-1 mt-3 overflow-x-auto">
           {tabs.map((t, i) => (
             <button key={i} onClick={() => setTab(i)}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold rounded-t-xl transition-all duration-200 whitespace-nowrap ${tab === i ? "bg-white/10 text-white border-t border-x border-white/20" : "text-gray-400 hover:text-gray-200"}`}>
@@ -225,7 +225,7 @@ export default function App() {
           ))}
         </div>
       </header>
-      <main className="w-full max-w-6xl mx-auto px-4 py-6">
+      <main className="w-full px-4 py-6">
         {tab === 0 && <TabPartidos data={data} setData={setData} />}
         {tab === 1 && <TabJugadores data={data} />}
         {tab === 2 && <TabResultados data={data} />}
