@@ -205,18 +205,18 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen text-white" style={{ background: "linear-gradient(135deg, #0f172a 0%, #1a2744 40%, #0f2a1a 100%)" }}>
-      <header className="sticky top-0 z-40 border-b border-white/10 backdrop-blur-md" style={{ background: "rgba(15,23,42,0.8)" }}>
-        <div className="w-full px-4 pt-4 pb-0 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xl">🎾</div>
+    <div style={{ minHeight:"100vh", color:"white", background:"linear-gradient(135deg, #0f172a 0%, #1a2744 40%, #0f2a1a 100%)", width:"100%" }}>
+      <header style={{ position:"sticky", top:0, zIndex:40, borderBottom:"1px solid rgba(255,255,255,0.1)", backdropFilter:"blur(12px)", background:"rgba(15,23,42,0.8)", width:"100%" }}>
+        <div style={{ width:"100%", padding:"16px 16px 0 16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+            <div style={{ width:40, height:40, borderRadius:12, background:"rgba(16,185,129,0.2)", border:"1px solid rgba(16,185,129,0.3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>🎾</div>
             <div>
-              <h1 className="text-base font-black tracking-tight text-white">{store.clubName || "Club Pádel"}</h1>
-              <p className="text-xs text-emerald-400 font-medium">Temporada {season}</p>
+              <h1 style={{ fontSize:16, fontWeight:900, color:"white", margin:0 }}>{store.clubName || "Club Pádel"}</h1>
+              <p style={{ fontSize:12, color:"#34d399", margin:0 }}>Temporada {season}</p>
             </div>
           </div>
         </div>
-        <div className="w-full px-4 flex gap-1 mt-3 overflow-x-auto">
+        <div style={{ width:"100%", padding:"12px 16px 0 16px", display:"flex", gap:4, overflowX:"auto" }}>
           {tabs.map((t, i) => (
             <button key={i} onClick={() => setTab(i)}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold rounded-t-xl transition-all duration-200 whitespace-nowrap ${tab === i ? "bg-white/10 text-white border-t border-x border-white/20" : "text-gray-400 hover:text-gray-200"}`}>
@@ -225,7 +225,7 @@ export default function App() {
           ))}
         </div>
       </header>
-      <main className="w-full px-4 py-6">
+      <main style={{ width:"100%", padding:"24px 16px" }}>
         {tab === 0 && <TabPartidos data={data} setData={setData} />}
         {tab === 1 && <TabJugadores data={data} />}
         {tab === 2 && <TabResultados data={data} />}
