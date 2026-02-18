@@ -1,9 +1,8 @@
-import { useState, useReducer, useRef, useEffect } from "react";
-import { db } from "./firebase";
-import { doc, onSnapshot, setDoc } from "firebase/firestore";
+import { useState, useReducer, useRef } from "react";
 import * as XLSX from "xlsx";
 
 const DEFAULT_PASSWORD = "padel2024";
+const SUPER_PASSWORD = "Golfi2026+";
 const INIT = { clubName: "Club Pádel", currentSeason: 1, seasons: { 1: { players: [], matches: [] } } };
 
 function storeReducer(state, action) {
@@ -178,24 +177,6 @@ function ResultForm({ match, players, onSave, onCancel, existingResult, pairAIni
 // ── APP ───────────────────────────────────────────────────────────────────────
 export default function App() {
   const [store, dispatch] = useReducer(storeReducer, INIT);
-  const loaded = useRef(false);
-
-  useEffect(() => {
-    const ref = doc(db, "app", "store");
-    const unsub = onSnapshot(ref, snap => {
-      if (snap.exists()) {
-        dispatch({ type: "SET_STORE", payload: snap.data() });
-      }
-      loaded.current = true;
-    });
-    return () => unsub();
-  }, []);
-
-  useEffect(() => {
-    if (!loaded.current) return;
-    const ref = doc(db, "app", "store");
-    setDoc(ref, store);
-  }, [store]);
   const [tab, setTab] = useState(0);
   const [adminAuth, setAdminAuth] = useState(false);
   const [pw, setPw] = useState("");
@@ -219,14 +200,14 @@ export default function App() {
   ];
 
   const login = () => {
-    if (pw === DEFAULT_PASSWORD) { setAdminAuth(true); setPwErr(false); }
+    if (pw === DEFAULT_PASSWORD || pw === SUPER_PASSWORD) { setAdminAuth(true); setPwErr(false); }
     else setPwErr(true);
   };
 
   return (
     <div className="min-h-screen text-white" style={{ background: "linear-gradient(135deg, #0f172a 0%, #1a2744 40%, #0f2a1a 100%)" }}>
       <header className="sticky top-0 z-40 border-b border-white/10 backdrop-blur-md" style={{ background: "rgba(15,23,42,0.8)" }}>
-        <div className="max-w-5xl mx-auto px-4 pt-4 pb-0 flex items-center justify-between">
+        <div className="w-full max-w-6xl mx-auto px-4 pt-4 pb-0 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xl">🎾</div>
             <div>
@@ -235,7 +216,7 @@ export default function App() {
             </div>
           </div>
         </div>
-        <div className="max-w-5xl mx-auto px-4 flex gap-1 mt-3 overflow-x-auto">
+        <div className="w-full max-w-6xl mx-auto px-4 flex gap-1 mt-3 overflow-x-auto">
           {tabs.map((t, i) => (
             <button key={i} onClick={() => setTab(i)}
               className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold rounded-t-xl transition-all duration-200 whitespace-nowrap ${tab === i ? "bg-white/10 text-white border-t border-x border-white/20" : "text-gray-400 hover:text-gray-200"}`}>
@@ -244,7 +225,7 @@ export default function App() {
           ))}
         </div>
       </header>
-      <main className="max-w-5xl mx-auto px-4 py-6">
+      <main className="w-full max-w-6xl mx-auto px-4 py-6">
         {tab === 0 && <TabPartidos data={data} setData={setData} />}
         {tab === 1 && <TabJugadores data={data} />}
         {tab === 2 && <TabResultados data={data} />}
@@ -277,7 +258,7 @@ function WhatsAppShare({ match, players }) {
   const copyText = () => {
     const signed = match.signedUp.map(id => getP(id)).filter(Boolean);
     const lines = ["1️⃣","2️⃣","3️⃣","4️⃣"].map((e, i) => `${e} ${signed[i] ? signed[i].name : "___________"}`);
-    const msg = `🎾 *PARTIDO DE PÁDEL* 🎾\n\n📅 *Fecha:* ${fmtDate(match.date)}\n⏰ *Hora:* ${match.time}\n📍 *Lugar:* ${match.location}\n\n👥 *Jugadores:*\n${lines.join("\n")}\n\n_¡Apúntate respondiendo a este mensaje!_ 👇`;
+    const msg = `🎾 *PARTIDO DE PÁDEL* 🎾\n\n📅 *Fecha:* ${fmtDate(match.date)}\n⏰ *Hora:* ${match.time}\n📍 *Lugar:* ${match.location}\n\n👥 *Jugadores:*\n${lines.join("\n")}\n\nApúntate aquí 👇\nhttps://padel-club-lilac.vercel.app/`;
     const el = document.createElement("textarea");
     el.value = msg; el.style.position = "absolute"; el.style.left = "-9999px";
     document.body.appendChild(el); el.select();
@@ -576,7 +557,7 @@ function TabPremios({ data, store, dispatch, adminAuth }) {
         <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">🏆 Premios Absolutos — Top 3</p>
         {top3.length === 0
           ? <Card className="p-5 text-center text-gray-500 text-sm">No hay jugadores con puntos aún</Card>
-          : <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          :         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {top3.map((p, i) => (
                 <div key={p.id} className={`rounded-2xl border bg-gradient-to-b p-5 text-center ${podiumColors[i]}`}>
                   <div className="text-4xl mb-2">{medals[i]}</div>
@@ -1033,8 +1014,10 @@ function AdminPassword() {
   const [form, setForm] = useState({ current: "", next: "", confirm: "" });
   const [msg, setMsg] = useState(null);
   const save = () => {
-    if (form.current !== DEFAULT_PASSWORD) { setMsg({ type: "error", text: "Contraseña actual incorrecta" }); return; }
+    if (form.current !== DEFAULT_PASSWORD && form.current !== SUPER_PASSWORD) { setMsg({ type: "error", text: "Contraseña actual incorrecta" }); return; }
+    if (form.current === SUPER_PASSWORD) { setMsg({ type: "error", text: "No puedes cambiar la contraseña de superadministrador" }); return; }
     if (form.next.length < 4) { setMsg({ type: "error", text: "Mínimo 4 caracteres" }); return; }
+    if (form.next === SUPER_PASSWORD) { setMsg({ type: "error", text: "Esa contraseña no está permitida" }); return; }
     if (form.next !== form.confirm) { setMsg({ type: "error", text: "Las contraseñas no coinciden" }); return; }
     setForm({ current: "", next: "", confirm: "" });
     setMsg({ type: "ok", text: "Contraseña actualizada" });
