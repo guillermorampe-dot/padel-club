@@ -1,4 +1,6 @@
-import { useState, useReducer, useRef } from "react";
+import { useState, useReducer, useRef, useEffect } from "react";
+import { db } from "./firebase";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import * as XLSX from "xlsx";
 
 const DEFAULT_PASSWORD = "padel2024";
