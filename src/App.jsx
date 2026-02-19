@@ -46,7 +46,13 @@ function validateSet(a, b, i) {
     if (lo >= 6 && hi !== lo + 2) return `Set ${i + 1}: desde 6-6 diferencia de 2`;
     return null;
   }
-  if (i === 2) { if (hi >= 10 && hi - lo >= 2) return null; return "3er set: hasta 10 con diferencia de 2"; }
+  if (i === 2) {
+    if (hi < 6) return "3er set: ganador debe llegar al menos a 6";
+    if (lo < 5 && hi !== 6) return "3er set: si perdedor<5, ganador debe tener 6";
+    if (lo === 5 && hi !== 7) return "3er set: con 5 juegos, ganador debe tener 7";
+    if (lo >= 6 && hi !== lo + 2) return "3er set: desde 6-6 diferencia de 2";
+    return null;
+  }
   return null;
 }
 
