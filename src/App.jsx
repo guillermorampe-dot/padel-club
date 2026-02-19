@@ -312,7 +312,9 @@ function TabPartidos({ data, setData }) {
       if (m.id !== mid || m.signedUp.includes(pid) || m.signedUp.length >= 4) return m;
       const ns = [...m.signedUp, pid];
       const playerObjs = ns.map(id => prev.players.find(p => p.id === id)).filter(Boolean);
-      const pairs = playerObjs.length === 4 ? makePairs(playerObjs) : [];
+      // Guardamos pairs como array plano de IDs para evitar arrays anidados en Firestore
+      const pairObjs = playerObjs.length === 4 ? makePairs(playerObjs) : [];
+      const pairs = pairObjs.map(pair => pair.map(p => p.id));
       return { ...m, signedUp: ns, pairs };
     })
   }));
@@ -364,13 +366,16 @@ function TabPartidos({ data, setData }) {
               <div className="border-t border-white/10 pt-4 mb-4">
                 <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-3">⚔️ Parejas (niveladas)</p>
                 <div className="grid grid-cols-2 gap-3">
-                  {m.pairs.map((pair, pi) => (
-                    <div key={pi} className={`rounded-xl p-3 text-center border ${pi === 0 ? "bg-blue-500/10 border-blue-500/30" : "bg-orange-500/10 border-orange-500/30"}`}>
-                      <p className={`text-xs font-bold mb-2 ${pi === 0 ? "text-blue-400" : "text-orange-400"}`}>Pareja {pi === 0 ? "A" : "B"}</p>
-                      {pair.map(p => <p key={p.id} className="text-sm font-semibold text-white">{p.name} <span className="text-xs text-gray-400">Nv.{Number(p.level).toFixed(2)}</span></p>)}
-                      <p className="text-xs text-gray-500 mt-1">Σ {pair.reduce((s, p) => s + (p.level || 1), 0).toFixed(2)}</p>
-                    </div>
-                  ))}
+                  {m.pairs.map((pair, pi) => {
+                    const pObjs = pair.map(id => getP(id)).filter(Boolean);
+                    return (
+                      <div key={pi} className={`rounded-xl p-3 text-center border ${pi === 0 ? "bg-blue-500/10 border-blue-500/30" : "bg-orange-500/10 border-orange-500/30"}`}>
+                        <p className={`text-xs font-bold mb-2 ${pi === 0 ? "text-blue-400" : "text-orange-400"}`}>Pareja {pi === 0 ? "A" : "B"}</p>
+                        {pObjs.map(p => <p key={p.id} className="text-sm font-semibold text-white">{p.name} <span className="text-xs text-gray-400">Nv.{Number(p.level).toFixed(2)}</span></p>)}
+                        <p className="text-xs text-gray-500 mt-1">Σ {pObjs.reduce((s, p) => s + (p.level || 1), 0).toFixed(2)}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -860,7 +865,7 @@ function AdminResults({ data, setData }) {
             <div className="mt-2 flex gap-2 flex-wrap">
               {m.pairs.map((pair, pi) => (
                 <span key={pi} className={`text-xs px-2 py-1 rounded-full ${pi === 0 ? "bg-blue-500/15 text-blue-400" : "bg-orange-500/15 text-orange-400"}`}>
-                  Pareja {pi === 0 ? "A" : "B"}: {pair.map(p => p.name).join(" / ")}
+                  Pareja {pi === 0 ? "A" : "B"}: {pair.map(id => { const p = getP(id); return p ? p.name : "?"; }).join(" / ")}
                 </span>
               ))}
             </div>
