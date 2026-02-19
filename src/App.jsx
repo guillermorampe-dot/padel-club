@@ -28,7 +28,9 @@ function fmtDate(d) {
 }
 
 function makePairs(playerObjects) {
-  const sorted = [...playerObjects].sort((a, b) => (b.level || 1) - (a.level || 1));
+  const valid = playerObjects.filter(Boolean);
+  if (valid.length < 4) return [];
+  const sorted = [...valid].sort((a, b) => (b.level || 1) - (a.level || 1));
   return [[sorted[0], sorted[3]], [sorted[1], sorted[2]]];
 }
 
@@ -304,13 +306,13 @@ function TabPartidos({ data, setData }) {
   const open = data.matches.filter(m => m.status !== "completed");
   const getP = id => data.players.find(p => p.id === id);
   const fixedIds = data.players.filter(p => p.fixed).map(p => p.id);
-  const clubName = data.clubName;
 
   const join = (mid, pid) => setData(prev => ({
     ...prev, matches: prev.matches.map(m => {
       if (m.id !== mid || m.signedUp.includes(pid) || m.signedUp.length >= 4) return m;
       const ns = [...m.signedUp, pid];
-      const pairs = ns.length === 4 ? makePairs(ns.map(id => prev.players.find(p => p.id === id)).filter(Boolean)) : [];
+      const playerObjs = ns.map(id => prev.players.find(p => p.id === id)).filter(Boolean);
+      const pairs = playerObjs.length === 4 ? makePairs(playerObjs) : [];
       return { ...m, signedUp: ns, pairs };
     })
   }));
