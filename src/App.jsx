@@ -1,4 +1,4 @@
-import { useState, useReducer, useRef } from "react";
+import { useState, useReducer, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
 
 const DEFAULT_PASSWORD = "padel2024";
