@@ -177,6 +177,24 @@ function ResultForm({ match, players, onSave, onCancel, existingResult, pairAIni
 // ── APP ───────────────────────────────────────────────────────────────────────
 export default function App() {
   const [store, dispatch] = useReducer(storeReducer, INIT);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const ref = doc(db, "app", "store");
+    const unsub = onSnapshot(ref, snap => {
+      if (snap.exists()) {
+        dispatch({ type: "SET_STORE", payload: snap.data() });
+      }
+      setLoaded(true);
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    const ref = doc(db, "app", "store");
+    setDoc(ref, store);
+  }, [store, loaded]);
   const [tab, setTab] = useState(0);
   const [adminAuth, setAdminAuth] = useState(false);
   const [pw, setPw] = useState("");
