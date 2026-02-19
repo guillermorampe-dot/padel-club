@@ -312,9 +312,11 @@ function TabPartidos({ data, setData }) {
       if (m.id !== mid || m.signedUp.includes(pid) || m.signedUp.length >= 4) return m;
       const ns = [...m.signedUp, pid];
       const playerObjs = ns.map(id => prev.players.find(p => p.id === id)).filter(Boolean);
-      // Guardamos pairs como array plano de IDs para evitar arrays anidados en Firestore
+      // Firestore no soporta arrays anidados: guardamos pairs como objetos planos
       const pairObjs = playerObjs.length === 4 ? makePairs(playerObjs) : [];
-      const pairs = pairObjs.map(pair => pair.map(p => p.id));
+      const pairs = pairObjs.length === 2
+        ? { a0: pairObjs[0][0].id, a1: pairObjs[0][1].id, b0: pairObjs[1][0].id, b1: pairObjs[1][1].id }
+        : null;
       return { ...m, signedUp: ns, pairs };
     })
   }));
@@ -362,15 +364,15 @@ function TabPartidos({ data, setData }) {
                 })}
               </div>
             </div>
-            {full && Array.isArray(m.pairs) && m.pairs.length === 2 && (
+            {full && m.pairs && m.pairs.a0 && (
               <div className="border-t border-white/10 pt-4 mb-4">
                 <p className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-3">⚔️ Parejas (niveladas)</p>
                 <div className="grid grid-cols-2 gap-3">
-                  {m.pairs.map((pair, pi) => {
-                    const pObjs = pair.map(id => getP(id)).filter(Boolean);
+                  {[[[m.pairs.a0, m.pairs.a1], "A", "bg-blue-500/10 border-blue-500/30", "text-blue-400"], [[m.pairs.b0, m.pairs.b1], "B", "bg-orange-500/10 border-orange-500/30", "text-orange-400"]].map(([ids, label, bg, txt]) => {
+                    const pObjs = ids.map(id => getP(id)).filter(Boolean);
                     return (
-                      <div key={pi} className={`rounded-xl p-3 text-center border ${pi === 0 ? "bg-blue-500/10 border-blue-500/30" : "bg-orange-500/10 border-orange-500/30"}`}>
-                        <p className={`text-xs font-bold mb-2 ${pi === 0 ? "text-blue-400" : "text-orange-400"}`}>Pareja {pi === 0 ? "A" : "B"}</p>
+                      <div key={label} className={`rounded-xl p-3 text-center border ${bg}`}>
+                        <p className={`text-xs font-bold mb-2 ${txt}`}>Pareja {label}</p>
                         {pObjs.map(p => <p key={p.id} className="text-sm font-semibold text-white">{p.name} <span className="text-xs text-gray-400">Nv.{Number(p.level).toFixed(2)}</span></p>)}
                         <p className="text-xs text-gray-500 mt-1">Σ {pObjs.reduce((s, p) => s + (p.level || 1), 0).toFixed(2)}</p>
                       </div>
@@ -861,11 +863,11 @@ function AdminResults({ data, setData }) {
           className={`cursor-pointer rounded-2xl border p-4 transition-all ${selId === m.id ? "bg-emerald-500/10 border-emerald-500/40" : "bg-white/5 border-white/10 hover:border-emerald-500/30"}`}>
           <p className="font-bold text-white">{fmtDate(m.date)} · {m.time} · {m.location}</p>
           <p className="text-xs text-gray-400 mt-1">{m.signedUp.map(id => { const p = getP(id); return p ? p.name : "?"; }).join(" · ")}</p>
-          {Array.isArray(m.pairs) && m.pairs.length === 2 && (
+          {m.pairs && m.pairs.a0 && (
             <div className="mt-2 flex gap-2 flex-wrap">
-              {m.pairs.map((pair, pi) => (
-                <span key={pi} className={`text-xs px-2 py-1 rounded-full ${pi === 0 ? "bg-blue-500/15 text-blue-400" : "bg-orange-500/15 text-orange-400"}`}>
-                  Pareja {pi === 0 ? "A" : "B"}: {pair.map(id => { const p = getP(id); return p ? p.name : "?"; }).join(" / ")}
+              {[[[m.pairs.a0, m.pairs.a1], "A", "bg-blue-500/15 text-blue-400"], [[m.pairs.b0, m.pairs.b1], "B", "bg-orange-500/15 text-orange-400"]].map(([ids, label, cls]) => (
+                <span key={label} className={`text-xs px-2 py-1 rounded-full ${cls}`}>
+                  Pareja {label}: {ids.map(id => { const p = getP(id); return p ? p.name : "?"; }).join(" / ")}
                 </span>
               ))}
             </div>
